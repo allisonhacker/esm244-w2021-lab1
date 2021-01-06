@@ -30,12 +30,47 @@ Data wrangling and summary statistics using functions in the `dplyr` package
 Find the top 5 highest observations of trees by legal status, wrangle, and make a graph.
 ```{r}
 
+### Wrangling
+
 top_5_status <- sf_trees %>%
   count(legal_status) %>% 
   drop_na(legal_status) %>% 
   rename(tree_count = n) %>% 
   relocate(tree_count) %>%
   slice_max(tree_count, n=5)
-  
+
+### Make a graph with ggplot
+
+ggplot(data = top_5_status, aes(x = fct_reorder(legal_status,tree_count), y = tree_count))+
+  geom_col()+
+  labs(x = "Legal Status", y = "Tree Count")+
+  coord_flip()+
+  theme_minimal()
 ```
+
+### More data wrangling examples
+
+Only want to keep observations for Blackwood Acacia trees, plot using lat and long
+
+```{r}
+
+blackwood_acacia <- sf_trees %>%
+  filter(str_detect(species, "Blackwood Acacia")) %>% 
+  select(legal_status, date, latitude, longitude)
+
+ggplot(data= blackwood_acacia, aes(x = latitude, y = longitude))+
+  geom_point()
+```
+
+### tidyr:: separate() and unite () functions
+
+Useful for separating columns
+```{r}
+sf_trees_sep <- sf_trees %>% 
+  separate(species, into = c("spp_scientific", "spp_common"), sep = "::")
+
+sf_trees_unite <- sf_trees %>% 
+  unite("id_status", tree_id:legal_status, sep = "_|_|_")
+```
+
 
